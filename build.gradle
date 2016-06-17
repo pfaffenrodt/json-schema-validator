@@ -1,3 +1,9 @@
+ext{
+    group = "com.box";
+    version = "2.2.10";
+    sourceCompatibility = "1.6";
+    targetCompatibility = "1.6"; // defaults to sourceCompatibility
+}
 
 /*
  * Repositories to use

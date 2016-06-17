@@ -24,10 +24,10 @@ apply(plugin: "osgi");
 apply(plugin: "idea");
 apply(plugin: "eclipse");
 
-group = "com.box";
-version = "2.2.10";
-sourceCompatibility = "1.6";
-targetCompatibility = "1.6"; // defaults to sourceCompatibility
+group = rootProject.ext.group;
+version = rootProject.ext.version;
+sourceCompatibility = rootProject.ext.sourceCompatibility;
+targetCompatibility = rootProject.ext.targetCompatibility; // defaults to sourceCompatibility
 
 /*
  * List of dependencies
