@@ -30,13 +30,6 @@ sourceCompatibility = "1.6";
 targetCompatibility = "1.6"; // defaults to sourceCompatibility
 
 /*
- * Repositories to use
- */
-repositories {
-    mavenCentral();
-}
-
-/*
  * List of dependencies
  */
 dependencies {
