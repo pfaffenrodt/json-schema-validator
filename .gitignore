@@ -5,3 +5,8 @@ build
 .gradle
 out
 gradle.properties
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+
+.DS_Store
