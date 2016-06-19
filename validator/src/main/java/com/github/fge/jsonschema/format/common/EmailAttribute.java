@@ -19,6 +19,8 @@
 
 package com.github.fge.jsonschema.format.common;
 
+import android.text.TextUtils;
+
 import com.github.fge.jackson.NodeType;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
@@ -26,9 +28,6 @@ import com.github.fge.jsonschema.format.AbstractFormatAttribute;
 import com.github.fge.jsonschema.format.FormatAttribute;
 import com.github.fge.jsonschema.processors.data.FullData;
 import com.github.fge.msgsimple.bundle.MessageBundle;
-
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 
 /**
  * Validator for the {@code email} format attribute.
@@ -61,11 +60,17 @@ public final class EmailAttribute
     {
         final String value = data.getInstance().getNode().textValue();
 
-        try {
-            new InternetAddress(value, true);
-        } catch (AddressException ignored) {
+        if(!isValidEmail(value)) {
             report.error(newMsg(data, bundle, "err.format.invalidEmail")
-                .putArgument("value", value));
+                    .putArgument("value", value));
+        }
+    }
+
+    public final static boolean isValidEmail(CharSequence target) {
+        if (TextUtils.isEmpty(target)) {
+            return false;
+        } else {
+            return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
         }
     }
 }

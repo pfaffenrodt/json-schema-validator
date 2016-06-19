@@ -28,13 +28,16 @@ targetCompatibility = rootProject.ext.targetCompatibility; // defaults to source
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
+
+    defaultConfig {
+        minSdkVersion 8
+    }
 }
 /*
  * List of dependencies
  */
 dependencies {
     compile(group: "com.box", name: "json-schema-core", version: "1.2.8");
-    compile(group: "javax.mail", name: "mailapi", version: "1.4.3");
     compile(group: "joda-time", name: "joda-time", version: "2.3");
     compile(group: "com.googlecode.libphonenumber", name: "libphonenumber",
         version: "6.2");
