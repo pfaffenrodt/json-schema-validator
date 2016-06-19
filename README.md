@@ -1,5 +1,11 @@
-# We are maintaining this branch
-As fge hasn't been around on his branch, we are accepting pull requests here and publishing to net.box.json-schema-validator.  If a point comes when fge returns we will try to get any patchset accepted here merged back into his branch.
+# Android Support
+This branch is to achieve an better support for android apps.
+My aim is to remove large dependencies to avoid [MultiDex](https://developer.android.com/studio/build/multidex.html) inside an android app.
+
+Any help would be great.
+
+for e.q i removed the mailapi that was used to validate "only" an email address.
+The mailapi also provide an whole email client and that is really not our goal
 
 ## Read me first
 
