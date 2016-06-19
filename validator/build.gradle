@@ -16,19 +16,19 @@
  * - LGPL 3.0: https://www.gnu.org/licenses/lgpl-3.0.txt
  * - ASL 2.0: http://www.apache.org/licenses/LICENSE-2.0.txt
  */
-
-apply(plugin: "java");
+apply plugin: 'com.android.library';
 apply(plugin: "maven");
 apply(plugin: "signing");
-apply(plugin: "osgi");
-apply(plugin: "idea");
-apply(plugin: "eclipse");
 
 group = rootProject.ext.group;
 version = rootProject.ext.version;
 sourceCompatibility = rootProject.ext.sourceCompatibility;
 targetCompatibility = rootProject.ext.targetCompatibility; // defaults to sourceCompatibility
 
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
+}
 /*
  * List of dependencies
  */
@@ -47,39 +47,7 @@ dependencies {
         exclude(group: "org.yaml", module: "snakeyaml");
     };
     testCompile(group: "org.mockito", name: "mockito-core", version: "1.9.5");
-    testCompile(group: "org.easytesting", name: "fest-assert", version: "1.4");
-}
-
-javadoc.options.links("http://docs.oracle.com/javase/6/docs/api/");
-javadoc.options.links("http://jsr-305.googlecode.com/svn/trunk/javadoc/");
-javadoc.options.links("http://fasterxml.github.com/jackson-databind/javadoc/2.2.0/");
-javadoc.options.links("http://fasterxml.github.com/jackson-core/javadoc/2.2.0/");
-javadoc.options.links("http://docs.guava-libraries.googlecode.com/git-history/v16.0.1/javadoc/");
-javadoc.options.links("http://fge.github.io/btf/");
-javadoc.options.links("http://fge.github.io/msg-simple/");
-javadoc.options.links("http://fge.github.io/jackson-coreutils/");
-javadoc.options.links("http://fge.github.io/uri-template/");
-javadoc.options.links("http://fge.github.io/json-schema-core/1.2.x/");
-
-
-/*
- * Necessary! Otherwise TestNG will not be used...
- *
- * Also, we don't want gradle's default HTML report: it does not support
- * parameterized tests which I use a _lot_.
- */
-test {
-    useTestNG() {
-        useDefaultListeners = true;
-    };
-}
-
-/*
- * Necessary to generate the source and javadoc jars
- */
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = "sources";
-    from sourceSets.main.allSource;
+    testCompile(group: "com.squareup.assertj", name: "assertj-android", version: "1.1.1");
 }
 
 /*
@@ -87,53 +55,71 @@ task sourcesJar(type: Jar, dependsOn: classes) {
  * automatically...
  */
 
-javadoc.options {
-    overview = "src/main/javadoc/overview.html";
-    extDirs = [ file("src/main/javadoc") ];
-    docFilesSubDirs = true;
+android.libraryVariants.all { variant ->
+    task("generate${variant.name.capitalize()}Javadoc", type: Javadoc) {
+        // title = ''
+        // description = ''
+        source = variant.javaCompile.source
+        classpath = files(variant.javaCompile.classpath.files, project.android.getBootClasspath())
+        options {
+            links("http://docs.oracle.com/javase/6/docs/api/");
+            linksOffline "http://d.android.com/reference","${android.sdkDirectory}/docs/reference"
+            links("http://jsr-305.googlecode.com/svn/trunk/javadoc/");
+            links("http://fasterxml.github.com/jackson-databind/javadoc/2.2.0/");
+            links("http://fasterxml.github.com/jackson-core/javadoc/2.2.0/");
+            links("http://docs.guava-libraries.googlecode.com/git-history/v16.0.1/javadoc/");
+            links("http://fge.github.io/btf/");
+            links("http://fge.github.io/msg-simple/");
+            links("http://fge.github.io/jackson-coreutils/");
+            links("http://fge.github.io/uri-template/");
+            links("http://fge.github.io/json-schema-core/1.2.x/");
+        }
+        exclude '**/BuildConfig.java'
+        exclude '**/R.java'
+    }
 }
 
 /*
  * Equally annoyingly, the docFilesSubDirs option above does not seem to have
  * any effect :/
  */
-task copyDocFiles(dependsOn: javadoc) << {
-    copy {
-        from("src/main/javadoc") {
-            include "**/doc-files/**";
-        };
-        into javadoc.destinationDir;
-    }
-}
+//task copyDocFiles(dependsOn: javadoc) << {
+//    copy {
+//        from("src/main/javadoc") {
+//            include "**/doc-files/**";
+//        };
+//        into javadoc.destinationDir;
+//    }
+//}
 
-task javadocJar(type: Jar, dependsOn: copyDocFiles) {
-    classifier = "javadoc";
-    from javadoc.destinationDir;
-}
+//task javadocJar(type: Jar, dependsOn: copyDocFiles) {
+//    classifier = "javadoc";
+//    from javadoc.destinationDir;
+//}
 
 /*
  * Creates a jar that can be used as a library on java projects.
  * This jar already includes all the dependencies.
  */
-task libJar(type: Jar, dependsOn: jar) {
-    classifier = "lib";
-    from {
-        configurations.compile.collect { zipTree(it) }
-    };
-    with jar;
-}
+//task libJar(type: Jar, dependsOn: jar) {
+//    classifier = "lib";
+//    from {
+//        configurations.compile.collect { zipTree(it) }
+//    };
+//    with jar;
+//}
 
-jar {
-    manifest {
-        attributes("Main-Class": "com.github.fge.jsonschema.main.cli.Main");
-    }
-}
-artifacts {
-    archives jar;
-    archives sourcesJar;
-    archives javadocJar;
-    archives libJar;
-}
+//jar {
+//    manifest {
+//        attributes("Main-Class": "com.github.fge.jsonschema.main.cli.Main");
+//    }
+//}
+//artifacts {
+//    archives jar;
+//    archives sourcesJar;
+//    archives javadocJar;
+//    archives libJar;
+//}
 
 
 task pom << {
@@ -194,44 +180,44 @@ uploadArchives {
 /*
  * Configure pom.xml on install, uploadArchives
  */
-[
-    install.repositories.mavenInstaller,
-    uploadArchives.repositories.mavenDeployer
-]*.pom*.whenConfigured { pom ->
-    pom.project {
-        name "${project.name}";
-        packaging "jar";
-        description "${project.ext.description}";
-        url "${projectURL}";
-
-        scm {
-            url "${scmUrl}";
-            connection "scm:git:${scmUrl}";
-            developerConnection "scm:git:${scmUrl}";
-        }
-
-        licenses {
-            license {
-                name "Lesser General Public License, version 3 or greater";
-                url "http://www.gnu.org/licenses/lgpl.html";
-                distribution "repo";
-            };
-            license {
-                name "Apache Software License, version 2.0";
-                url "http://www.apache.org/licenses/LICENSE-2.0";
-                distribution "repo";
-            }
-        }
-
-        developers {
-            developer {
-                id "metadata-dev";
-                name "Metadata Developer";
-                email "metadata-dev@box.com";
-            }
-        }
-    }
-}
+//[
+//    install.repositories.mavenInstaller,
+//    uploadArchives.repositories.mavenDeployer
+//]*.pom*.whenConfigured { pom ->
+//    pom.project {
+//        name "${project.name}";
+//        packaging "jar";
+//        description "${project.ext.description}";
+//        url "${projectURL}";
+//
+//        scm {
+//            url "${scmUrl}";
+//            connection "scm:git:${scmUrl}";
+//            developerConnection "scm:git:${scmUrl}";
+//        }
+//
+//        licenses {
+//            license {
+//                name "Lesser General Public License, version 3 or greater";
+//                url "http://www.gnu.org/licenses/lgpl.html";
+//                distribution "repo";
+//            };
+//            license {
+//                name "Apache Software License, version 2.0";
+//                url "http://www.apache.org/licenses/LICENSE-2.0";
+//                distribution "repo";
+//            }
+//        }
+//
+//        developers {
+//            developer {
+//                id "metadata-dev";
+//                name "Metadata Developer";
+//                email "metadata-dev@box.com";
+//            }
+//        }
+//    }
+//}
 
 ext.forRelease = !version.endsWith("-SNAPSHOT");
 signing {
